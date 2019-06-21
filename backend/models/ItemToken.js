@@ -14,7 +14,10 @@ const ItemToken = new Schema({
   intelligence: Number,
 
   bonus: Number,
-  bonusModifier: Number
+  bonusModifier: Number,
+
+  issued: Number,
+  amount: Number
 });
 
 module.exports = mongoose.model("ItemToken", ItemToken);

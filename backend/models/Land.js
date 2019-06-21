@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 
 const Land = new Schema({
   serial: Number,
+  type: Number,
   income: Number,
   name: String,
   owner: {

@@ -10,10 +10,15 @@ const User = new Schema({
   address: String,
 
   balance: Number,
+  income: Number,
 
-  empire: Number
+  empire: Number,
+
+  joinDate: Date,
+  lastLogin: Date
 });
 
-User.index({ empire: 1 });
+//User.index({ empire: 1 });
+User.index({ address: 1 });
 
 User.module.exports = mongoose.model("User", User);

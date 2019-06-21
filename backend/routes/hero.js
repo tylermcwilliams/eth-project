@@ -2,6 +2,7 @@ const router = require("express").Router();
 
 const Hero = require("../models/Hero");
 const Item = require("../models/Item");
+const Market = require("../models/Market");
 
 // GET /:address/:id
 // gets a hero by id
@@ -24,15 +25,20 @@ router.get("/:id", (req, res) => {
           res.status(400).json(err);
         }
 
-        res.json({
-          type: hero.type,
-          owner: hero.owner,
+        Market.findOne({ product: hero.id }, (err, market) => {
+          if (err) {
+            res.status(400).json(err);
+          }
+          res.json({
+            type: hero.type,
+            owner: hero.owner,
 
-          name: hero.name,
-          experience: hero.experience,
-          level: hero.level,
-          units: hero.units,
-          items: [...items]
+            name: hero.name,
+            experience: hero.experience,
+            level: hero.level,
+            units: hero.units,
+            items: [...items]
+          });
         });
       });
     });

@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const Market = new Schema({
-  start: Date,
+  type: Number,
   product: {
     type: Schema.Types.ObjectId
   },
@@ -11,11 +11,12 @@ const Market = new Schema({
     type: Schema.Types.ObjectId,
     ref: "User"
   },
-  bidder: {
+  bestBid: Number,
+  bestBidder: {
     type: Schema.Types.ObjectId,
     ref: "User"
   },
-  minimumPrice: Number,
+
   buyOut: Number
 });
 

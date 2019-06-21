@@ -1,6 +1,7 @@
 const router = require("express").Router();
 
 const Item = require("../models/Item");
+const Market = require("../models/Market");
 
 // GET /:id
 // gets a item by id
@@ -14,16 +15,19 @@ router.get("/:id", (req, res) => {
       }
       if (!item) {
         res.status(404).json({
-          error: "item not found"
+          error: "Item not found"
         });
       }
 
-      // the items the item has will be fetched seperately
-      res.json({
-        type: item.type,
-        owner: item.owner,
-
-        name: item.name
+      Market.findOne({ product: item.id }, (err, market) => {
+        if (err) {
+          res.status(400).json(err);
+        }
+        res.json({
+          type: item.type,
+          owner: item.owner,
+          name: item.name
+        });
       });
     });
 });
