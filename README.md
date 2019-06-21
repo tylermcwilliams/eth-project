@@ -1,3 +1,3 @@
 # eth-project
 
-ethereum based strategy game
+ethereum based browser strategy game
