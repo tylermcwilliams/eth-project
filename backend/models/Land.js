@@ -3,9 +3,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const Land = new Schema({
-  id: Number,
-  type: Number,
-  bonus: Number,
+  serial: Number,
   income: Number,
   name: String,
   owner: {
@@ -13,7 +11,12 @@ const Land = new Schema({
     ref: "User"
   },
 
+  bonus: Number,
+  bonusModifier: Number,
+
   buildings: [Number]
 });
+
+Land.index({ owner: 1 });
 
 module.exports = mongoose.model("Land", Land);

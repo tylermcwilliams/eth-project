@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
-const User = Schema({
+const User = new Schema({
   name: String,
   email: String,
 
@@ -11,37 +11,9 @@ const User = Schema({
 
   balance: Number,
 
-  empire: Number,
-  lands: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "Land"
-    }
-  ],
-
-  items: [
-    {
-      type: {
-        type: Schema.Types.ObjectId,
-        ref: "Item"
-      },
-      amount: Number
-    }
-  ],
-
-  heroes: [
-    {
-      id: Number,
-      level: Number,
-      items: [Number],
-      units: [
-        {
-          type: Number,
-          amount: Number
-        }
-      ]
-    }
-  ]
+  empire: Number
 });
 
-module.exports = mongoose.model("User", User);
+User.index({ empire: 1 });
+
+User.module.exports = mongoose.model("User", User);

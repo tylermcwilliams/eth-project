@@ -49,11 +49,11 @@ router.get("/nonce/:address", (req, res) => {
         nonce: Math.floor(Math.random * 10000)
       });
 
-      newUser.save((err, user) => {
+      newUser.save((err, newuser) => {
         if (err) {
           res.status(400).json(err);
         }
-        user = newUser;
+        user = newuser;
       });
     }
 
