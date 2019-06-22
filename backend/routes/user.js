@@ -1,9 +1,10 @@
 const router = require("express").Router();
 const ethUtil = require("ethereumjs-util");
 const sigUtil = require("eth-sig-util");
+const filter = require("bad-words");
 const jwt = require("jsonwebtoken");
 
-const { secret } = require("../config/keys");
+const { jwtSecret } = require("../config/keys");
 const User = require("../models/User");
 
 // GET /:id
@@ -20,11 +21,11 @@ router.get("/:id", (req, res) => {
           name: user.name,
           address: user.address,
           empire: user.empire,
-          lands: [...lands],
+          lands: [...user.lands],
           heroes: [...user.heroes]
         });
       } else {
-        return res.status(404).json({ message: "User not found." });
+        return res.status(404).json({ error: "User not found." });
       }
     }
   );
@@ -46,6 +47,7 @@ router.get("/nonce/:address", (req, res) => {
       // create new user
       const newUser = new User({
         address: req.body.address,
+        name: req.body.address,
         nonce: Math.floor(Math.random * 10000)
       });
 
@@ -62,7 +64,7 @@ router.get("/nonce/:address", (req, res) => {
 });
 
 // POST /login
-// Logs in a user,info is in body
+// Logs in a user
 router.post("/login", (req, res) => {
   // return if address is invalid
   if (!ethUtil.isValidAddress(req.body.address)) {
@@ -75,7 +77,7 @@ router.post("/login", (req, res) => {
     }
     // if user doesn't exist, return
     if (!user) {
-      res.status(400).json({ message: "User doesn't exist." });
+      res.status(404).json({ error: "User doesn't exist." });
     }
     // verification of signiature
     const msg =
@@ -98,7 +100,7 @@ router.post("/login", (req, res) => {
         id: user.id,
         address: user.address
       },
-      secret,
+      jwtSecret,
       {},
       (err, token) => {
         if (err) {
@@ -113,4 +115,11 @@ router.post("/login", (req, res) => {
   });
 });
 
+// POST /edit
+// Edits a user
+router.post(
+  "/edit",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {}
+);
 module.exports = router;

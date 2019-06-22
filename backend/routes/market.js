@@ -22,7 +22,7 @@ router.get("/all", (req, res) => {
         });
       }
       res.json({
-        products
+        products: [...products]
       });
     });
 });
@@ -75,7 +75,9 @@ router.post(
         schema = Land;
         break;
       default:
-        schema = null;
+        res.status(400).json({
+          error: "Invalid type."
+        });
         break;
     }
     schema.findOne(
