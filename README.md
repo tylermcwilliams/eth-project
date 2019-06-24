@@ -1,11 +1,11 @@
-<p align="center">
+<p align="left">
   <img
-    alt="Eth-land-game"
+    alt="eth-land-game"
     src="./frontend/img/git_img_test2.png"
-    width="400"
+    width="256"
   />
 </p>
 
-<center> <h1>heading 1</h1> </center>
+# eth-land-game
 
 an ethereum based browser strategy game
