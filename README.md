@@ -6,5 +6,5 @@
   />
 </p>
 
-#eth-land-game
+# eth-land-game
 an ethereum based browser strategy game
