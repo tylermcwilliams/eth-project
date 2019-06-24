@@ -1,0 +1,99 @@
+*** warnings ***
+//DO NOT EVER MODIFY ARGUMENTS
+//DO NOT CREATE SIDE EFFECTS
+
+//for some reason resizing the screen breaks certain coordinate parameters
+//in the dom elements
+
+- ignore, just getting my brain back in on programming, notes to self
+choose the simplest solution with only the immediate in mind
+test and verify every small change
+take in and pass out only through the interface, do not use sideeffects of any sort
+verify what passes in (this also makes the type more explicit)
+manage state only within its own privatized scope
+when a structure gets too complex but a simpler version of it is still in use, split it up
+(ex: is a hexagon with an image property and land property just a hexagon anymore?)
+favor static passing of data over calculating with dependencies and keeping states
+use getters and setters for private vars
+triple-check when you "finish" something, so you memorize it better and check over errors
+DONT even modify state variables from a fn. at worst, read them.
+ALWAYS expecitly modify state variables outside the function
+(mostly done by storing return and reassigning the responded variable)
+NAMESPACE everything
+EXPLICITLY use closures for functions that maintain states. dont store the state in the master-state
+of the class
+DONT use function chains and inheritance chains, stick to composition. additionally, dont delete
+outdated functions, move them to an unused function folder or just leave them unused for later viability
+
+PURE FUNCTIONS EVERYWHERE, DONT CALCULATE STATE VARIABLES NON EXPLICITLY EITHER
+
+-
+
+ -- game ideas --
+(EXPEDITIONS) - a multi-couorse PvE battle where you don't get to regen inbetween beside scroll use
+(POTIONS) - stilistically, if your unit has a WEIGHT limit for an expedition, perhaps carrying usable items
+isn't a bad design choice. just make them expensive and hard to come by, and limited in use -- meaning, actual value
+and a potentialy trades good, ex: higher tier potions heal more for less weight
+(UNITS) units have 3 parameters -- total units, healthy units, injured units.
+(LIMITERS) to limit growth of inactive users, if one stays close to PvE land, the monsters may "occupy" the "health points" of
+ones land, reducing income and bonuses from land, etc.
+(STRATEGY) strategizing should mostly revolve around the actual pve fights, ex: more units to take out to battle, bigger the travel cost.
+here would come in the actual most gambles and risk in the game. while a player cant lose land, he can effectively stagnate himself to a halt 
+if his land is worthless and hes failing fights
+
+todo:
+seperate functions into layers based on priority {
+    ex: the media should be loaded wholly before anything else
+}
+
+add screen layer to game layer {
+    canvas, context in multiple layers
+    create preloading
+}
+
+
+define a new layer for hexagons, which defines image and properties
+lets call it "game tile"
+{
+    define a gametile
+    define a tilemap
+}
+panning
+{
+    how to do panning -
+    create a screen class
+    encompass canvas and ctx in this class
+    create a pnt variable defining an "offset"
+    pass view position through this offset
+    change offset based on mouse control
+    the structure of an object should have the least possible complexity, and mostly just storage and names
+    {
+        add a true pan which is more than just shifting the canvas, same for the zoom
+    }
+}
+zoom
+{
+    this will be a bit complicated but ill figure something out 
+}
+console
+{
+    add debug module which can be turned on/off 
+    while debug, enable console
+    add a pos location to the mouse
+    add a simple drawrect method that creates a slightly transparent rect to imitate shapes
+    add method that display at cursor the contents of a passed object!!!
+}
+drawing tiles
+{
+    modify hexagonmap method to allow a brush
+    a brush checks mousepos as normally except it assigns properties to that item
+    get keypress to change selected properties
+}
+
+rather than storing the image of the map, just make a map chunk preloader
+{
+    render map in a hidden canvas, draw finished and layered img when necessary
+}
+
+and clean up code 
+for ease of use, draw a img representation of the structure like there was for the backend (done, this was helpful)

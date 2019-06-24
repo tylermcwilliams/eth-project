@@ -1,0 +1,136 @@
+html, body {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+button {
+    padding: 0;
+    margin: 0;
+}
+
+#main-wrapper {
+    background-color: #9ECAC6;
+    width: 100%;
+    height: 100%;
+}
+
+#main {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    margin-top: -300px;
+    margin-left: -600px;
+    width: 1200px;
+    height: 600px;
+    background-color: black;
+}
+
+#prof-mock-img {
+    width: 93px;
+    height: 93px;
+}
+
+#screen {
+    width: 800px;
+    height: 600px;
+    float: left;
+}
+
+#menu {
+    width: 400px;
+    height: 600px;
+    float: left;
+    background-color: #221916;
+}
+
+.land-window {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    width: 382px;
+    height: 60px;
+}
+
+.leader {
+    text-align: left;
+}
+
+#bubble-window{
+    background-color: white;
+}
+
+.menu-window {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    height: 400px;
+}
+
+.menu-button {
+    width: 200px;
+    height: 60px;
+}
+
+#house-window {
+    height: 400px;
+    width: 400px;
+}
+
+#menu-top {
+    width: 400px;
+    height: 100px;
+}
+
+#float-buttons {
+    width: 400px;
+    height: 100px;
+}
+
+#big-buttons{
+    height: 400px;
+    width: 400px;
+}
+
+#values {
+    height: 100px;
+    width: 300px;
+}
+
+.float-button {
+    float: left;
+    width: 100px;
+    height: 100px;
+}
+
+.wrap-thing {
+    width: 400px;
+    height: 100px;
+}
+
+.slot-button {
+    float: right;
+    width: 60px;
+    height: 60px;
+}
+
+.float-value {
+    height: 50px;
+    float: left;
+    width: 150px;
+    background-color: white;
+    text-align: center;
+}
+
+.leader {
+    float: left;
+    width: 250px;
+}
+
+.float-l {
+    float:left;
+}
+
+.start-hidden {
+    display: none;
+}

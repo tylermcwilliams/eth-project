@@ -1,0 +1,141 @@
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <script type="text/javascript" src="./js/include.js"></script>
+    <script type="text/javascript" src="./js/index.js"></script>
+    <link rel="stylesheet" type="text/css" href="./css/index.css">
+    <style>
+        #main {
+            cursor: url( "./img/cursor10.png" ), auto;
+        }
+        button {
+            cursor: url( "./img/cursor10.png" ), auto;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 
+
+        this is just a sketch for how the interface could look like
+
+    -->
+    <div id="main-wrapper">
+        <div id="main">
+            <div id="screen">
+                <canvas id="canvas-a" width="800px" height="600px"></canvas>
+            </div>
+            <div id="menu">
+                <div id="menu-top">
+                    <div id="values" class="float-l">
+                        <div class="float-value">777</div>
+                        <div class="float-value">777</div>
+                        <div class="float-value">777</div>
+                        <div class="float-value">777</div>
+                    </div>
+                    <div id="profile" class="float-l">
+                        <button class="float-button">
+                            <img id="prof-mock-img" src="./img/mock_prof_img.png">
+                        </button>
+                    </div>
+                </div>
+                <div id="float-buttons">
+                    <button class="float-button menu-sel">house</button>
+                    <button class="float-button menu-sel">shield</button>
+                    <button class="float-button menu-sel">bag</button>
+                    <button class="float-button menu-sel">bubble</button>
+                </div>
+                <div id="big-buttons">
+                    <div id="house-window" class="menu-window">
+                        <div class="land-window">
+                            <button class="menu-button">
+                                land: building slots
+                            </button>
+                            <button class="slot-button">...</button>
+                            <button class="slot-button">...</button>
+                            <button class="slot-button">sell</button>
+                        </div>
+                        <div class="land-window">
+                            <button class="menu-button">
+                                land: building slots
+                            </button>
+                            <button class="slot-button">...</button>
+                            <button class="slot-button">...</button>
+                            <button class="slot-button">sell</button>
+                        </div>
+                        <div class="land-window">
+                            <button class="menu-button">
+                                land: building slots
+                            </button>
+                            <button class="slot-button">...</button>
+                            <button class="slot-button">...</button>
+                            <button class="slot-button">sell</button>
+                        </div>
+                        <div class="land-window">
+                            <button class="menu-button">
+                                land: building slots
+                            </button>
+                            <button class="slot-button">...</button>
+                            <button class="slot-button">...</button>
+                            <button class="slot-button">sell</button>
+                        </div>
+                    </div>
+                    
+                    <div id="shield-window" class="start-hidden menu-window">
+                        <div class="wrap-thing">
+                                <img class="float-l" src="./img/mock_prof_img.png"></im>
+                                <button class="menu-button leader">leader card (add canvas popup hero inventory)</button>        
+                        </div>
+                        <div class="wrap-thing">
+                                <img class="float-l" src="./img/army_mock_img.png"></im>
+                                <button class="menu-button leader">unit card</button>        
+                        </div>
+                        <div class="wrap-thing">
+                                <img class="float-l" src="./img/army_mock_img.png"></im>
+                                <button class="menu-button leader">unit card</button>        
+                        </div>
+                        <div class="wrap-thing">
+                                <img class="float-l" src="./img/mock_prof_img.png"></im>
+                                <button class="menu-button leader">leader card</button>        
+                        </div>
+                        <div class="wrap-thing">
+                                <img class="float-l" src="./img/army_mock_img.png"></im>
+                                <button class="menu-button leader">unit card</button>        
+                        </div>
+                        <div class="wrap-thing">
+                                <img class="float-l" src="./img/mock_prof_img.png"></im>
+                                <button class="menu-button leader">leader card</button>        
+                        </div>
+                    </div>
+                    <div id="bag-window" class="start-hidden menu-window">
+                        <button class="menu-button">item</button>
+                        <button class="menu-button">item</button>
+                        <button class="menu-button">scroll</button>
+                        <button class="menu-button">scroll</button>
+                        <button class="menu-button">item</button>
+                        <button class="menu-button">amulet</button>
+                        <button class="menu-button">amulet</button>
+                        <button class="menu-button">scroll</button>
+                    </div>
+                    <div id="bubble-window" class="start-hidden menu-window">
+                        <p>PlaceholderA: hello</p>
+                        <p>(land b has been sold)</p>
+                        <p>PlaceholderB: hello</p>
+                        <p>(raid boss has fallen)</p>
+                        <p>PlaceholderC: woow</p>
+                        <p>PlaceholderD: how do i use the market</p>
+                        <p>PlaceholderC: click house click market</p>
+                        <p>(placeholdera now holds the crown)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+<footer>
+
+</footer>
+
+</html>
