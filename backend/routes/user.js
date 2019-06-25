@@ -1,8 +1,11 @@
 const router = require("express").Router();
 const ethUtil = require("ethereumjs-util");
 const sigUtil = require("eth-sig-util");
-const filter = require("bad-words");
 const jwt = require("jsonwebtoken");
+const filter = require("leo-profanity");
+const isEmpty = require("is-empty");
+const validator = require("validator");
+const userValid = require("../validation/userValid");
 
 const { jwtSecret } = require("../config/keys");
 const User = require("../models/User");
@@ -32,7 +35,7 @@ router.get("/:id", (req, res) => {
 });
 
 // GET /nonce/:address
-// gets user's nonce
+// Gets user's nonce
 router.get("/nonce/:address", (req, res) => {
   // return if address is invalid
   if (!ethUtil.isValidAddress(req.body.address)) {
@@ -116,10 +119,33 @@ router.post("/login", (req, res) => {
 });
 
 // POST /edit
-// Edits a user
+// Edits a user. It's up to the front end to fill out the parameters. Empty parameters are accepted.
 router.post(
   "/edit",
   passport.authenticate("jwt", { session: false }),
-  (req, res) => {}
+  (req, res) => {
+    // validation
+    userValid(
+      {
+        address: res.user.address,
+        name: req.body.name,
+        email: req.body.email
+      },
+      err => {
+        if (err) {
+          res.status(400).json(err);
+        }
+
+        res.user.name = isEmpty(req.body.name)
+          ? req.user.address
+          : req.body.name;
+
+        res.user.email = req.body.email;
+        res.user.save();
+
+        res.json({ message: "Successfully updated user" });
+      }
+    );
+  }
 );
 module.exports = router;
