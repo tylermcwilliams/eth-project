@@ -14,14 +14,14 @@ router.get("/all", (req, res) => {
     .populate("product owner")
     .exec((err, products) => {
       if (err) {
-        res.status(400).json(err);
+        return res.status(400).json(err);
       }
-      if (!product) {
-        res.status(404).json({
+      if (!products) {
+        return res.status(404).json({
           error: "Market is empty."
         });
       }
-      res.json({
+      return res.json({
         products: [...products]
       });
     });
@@ -34,14 +34,14 @@ router.get("/:id", (req, res) => {
     .populate("product owner")
     .exec((err, product) => {
       if (err) {
-        res.status(400).json(err);
+        return res.status(400).json(err);
       }
       if (!product) {
-        res.status(404).json({
+        return res.status(404).json({
           error: "Item not found."
         });
       }
-      res.json({
+      return res.json({
         product: product.product,
         owner: product.owner,
         buyOut: product.buyOut,
@@ -58,7 +58,7 @@ router.post(
   (req, res) => {
     // Verify the validity of body
     if (req.body.buyOut <= 0) {
-      res.status(400).json({
+      return res.status(400).json({
         error: "Buy out price cannot be less than or equal to zero."
       });
     }
@@ -75,19 +75,18 @@ router.post(
         schema = Land;
         break;
       default:
-        res.status(400).json({
+        return res.status(400).json({
           error: "Invalid type."
         });
-        break;
     }
     schema.findOne(
       { owner: req.user.address, id: req.body.id },
       (err, product) => {
         if (err) {
-          res.status(400).json(err);
+          return res.status(400).json(err);
         }
         if (!product) {
-          res.status(400).json({
+          return res.status(400).json({
             error: "You cannot sell this item."
           });
         }
@@ -98,6 +97,7 @@ router.post(
           buyOut: product.buyOut
         });
         newOrder.save();
+        return res.json({ message: "Successfully added." });
       }
     );
   }
@@ -113,10 +113,10 @@ router.post(
       .populate("owner bestBidder")
       .exec((err, product) => {
         if (err) {
-          res.status(400).json(err);
+          return res.status(400).json(err);
         }
         if (!product || product.bestBid > req.body.offer) {
-          res.status(404).json({
+          return res.status(404).json({
             error: "Unable to place bid."
           });
         }
@@ -133,8 +133,9 @@ router.post(
             schema = Land;
             break;
           default:
-            schema = null;
-            break;
+            return res.status(400).json({
+              error: "Invalid type."
+            });
         }
 
         schema
@@ -142,10 +143,10 @@ router.post(
           .populate("type")
           .exec((err, item) => {
             if (err) {
-              res.status(400).json(err);
+              return res.status(400).json(err);
             }
             if (!item) {
-              res.status(404).json({
+              return res.status(404).json({
                 error: "Item not found."
               });
             }
@@ -167,6 +168,7 @@ router.post(
               product.save();
             }
             req.user.save();
+            return res.json({ message: "Successfully placed bid." });
           });
       });
   }
@@ -182,7 +184,7 @@ router.post(
       .populate("product owner bestBidder")
       .exec((err, product) => {
         if (err) {
-          res.status(400).json(err);
+          return res.status(400).json(err);
         }
         if (!product || product.owner.id != req.user.id) {
           res.status(404).json({
@@ -194,6 +196,8 @@ router.post(
         item.save();
         req.user.save();
         product.remove();
+
+        return res.json({ message: "Successfully accepted bid." });
       });
   }
 );
@@ -206,23 +210,25 @@ router.post(
   (req, res) => {
     Market.findById(req.params.id, (err, product) => {
       if (err) {
-        res.status(400).json(err);
+        return res.status(400).json(err);
       }
       if (!product || product.owner != req.user.id) {
-        res.status(404).json({
+        return res.status(404).json({
           error: "Product not found."
         });
       }
 
       // if the new price is less than highest bid, return
       if (product.bestBid > req.body.offer) {
-        res.status(400).json({
+        return res.status(400).json({
           error: "Cannot post offer less than highest bid!"
         });
       }
 
       product.buyOut = req.body.offer;
       product.save();
+
+      return res.json({ message: "Successfully edited sale." });
     });
   }
 );
@@ -237,10 +243,10 @@ router.delete(
       .populate("bestBidder")
       .exec((err, product) => {
         if (err) {
-          res.status(400).json(err);
+          return res.status(400).json(err);
         }
         if (!product || product.owner != req.user.id) {
-          res.status(404).json({
+          return res.status(404).json({
             error: "Product not found."
           });
         }
@@ -248,6 +254,8 @@ router.delete(
         product.bestBidder.balance += product.bestBid;
         product.bestBidder.save();
         product.remove();
+
+        return res.json({ message: "Successfully removed sale." });
       });
   }
 );

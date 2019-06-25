@@ -11,19 +11,19 @@ router.get("/:id", (req, res) => {
     .populate("owner")
     .exec((err, land) => {
       if (err) {
-        res.status(400).json(err);
+        return res.status(400).json(err);
       }
       if (!land) {
-        res.status(404).json({
-          error: "Land not found"
+        return res.status(404).json({
+          error: "Land not found."
         });
       }
 
       Market.findOne({ product: land.id }, (err, market) => {
         if (err) {
-          res.status(400).json(err);
+          return res.status(400).json(err);
         }
-        res.json({
+        return res.json({
           type: land.type,
           owner: land.owner,
           name: land.name,
