@@ -21,4 +21,4 @@ const User = new Schema({
 //User.index({ empire: 1 });
 User.index({ address: 1 });
 
-User.module.exports = mongoose.model("User", User);
+module.exports = mongoose.model("User", User);
