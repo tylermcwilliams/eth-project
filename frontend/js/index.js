@@ -210,7 +210,7 @@ Game.TileMap = (( assertArgs, Pnt, Hexagon, Tile, Imgs ) => {
     assertArgs( "TileMap params in IIFE", Pnt, Hexagon, Tile, Imgs );
     //predefine the base unit and dimension/frame of the tilemap grid
     //note: this is not a standard grid and is hexagonal
-    const frame = new Pnt( 4, 4 );
+    const frame = new Pnt( 16, 16 );
     const unit  = 64;
     
     let tile_id_count = 0;
@@ -278,6 +278,8 @@ Game.TileMap = (( assertArgs, Pnt, Hexagon, Tile, Imgs ) => {
     function drawTilesAtOffset( ctx, offset ) {
         let row = 0;
         let row_length = frame.y;
+
+        //note: dont draw outside canvas for performance
 
         //account for tile images having an "underside"
         //note: this needs to be better resolved 
@@ -415,11 +417,6 @@ function index() {
     //let images = Media.images.get;
     //console.log( images );
     
-    
-    let hex     = new Util.Hexagon( new Pnt( 50, 50 ), 256 ); 
-    let tile    = new GameObject.Tile( hex, {}, {} );
-    
-    
     let mouse_pos_old   = new Pnt( 0, 0 );
     let mouse_pos       = new Pnt( 0, 0 );
     
@@ -429,20 +426,53 @@ function index() {
     
     //initial draw
     Game.TileMap.drawTilesAtOffset( context, mouse_offset );
-            
+    
+    let zoom_on = new Pnt( 0.5, 0.5 );
+    let zoom_off = new Pnt( 1 / zoom_on.x, 1 / zoom_on.y );
+    
+    let zoom_toggle = false;
+
     let mouse_down = false;
-    context.canvas.addEventListener( "mousedown", () => {
-        mouse_down = true;
+    context.canvas.addEventListener( "mousedown", ( e ) => {
+        
+        if ( e.button == 0 ) {
+            mouse_down = true;
+        }
+
+        if ( e.button == 2 ) {
+            if ( zoom_toggle ) {
+                zoom_toggle = !zoom_toggle;
+                context.scale( zoom_off.x, zoom_off.y );
+            } else {
+                zoom_toggle = !zoom_toggle;
+                context.scale( zoom_on.x, zoom_on.y );
+            }
+        }
+        
+        return false;
+    });
+    
+    
+    window.addEventListener( "mouseup", ( e ) => {
+        if ( e.button == 0 ) {
+            mouse_down = false;
+        }
+        
     });
 
-    context.canvas.addEventListener( "mouseup", () => {
-        mouse_down = false;
+    window.addEventListener( "contextmenu", ( e ) => {
+        e.preventDefault();
     });
-
-    context.canvas.addEventListener( "mousemove", ( e ) => {
+    
+    window.addEventListener( "mousemove", ( e ) => {
         mouse_pos_old = new Pnt( mouse_pos.x, mouse_pos.y );
         mouse_pos.x = e.clientX - canvas_bounding_box.left;
         mouse_pos.y = e.clientY - canvas_bounding_box.top;
+        
+        if ( zoom_toggle ) {
+            mouse_pos.x *= zoom_off.x;
+            mouse_pos.y *= zoom_off.y;
+        }
         
         let mouse_pos_with_offset = new Pnt( mouse_pos.x - mouse_offset.x, mouse_pos.y - mouse_offset.y );
         let collided_tile = Game.TileMap.getTileAtPos( mouse_pos_with_offset );
@@ -451,8 +481,13 @@ function index() {
             let mouse_diff_x = mouse_pos.x - mouse_pos_old.x;
             let mouse_diff_y = mouse_pos.y - mouse_pos_old.y;
 
-            mouse_offset.x += mouse_diff_x;
-            mouse_offset.y += mouse_diff_y;
+            if ( zoom_toggle ) {
+                mouse_offset.x += mouse_diff_x * zoom_off.x;
+                mouse_offset.y += mouse_diff_y * zoom_off.y;
+            } else {
+                mouse_offset.x += mouse_diff_x;
+                mouse_offset.y += mouse_diff_y;
+            }
         }
         
 
@@ -474,16 +509,21 @@ function index() {
 
     });
 
-    let framerate_30 = 1000 / 30;
-    let framerate_60 = 1000 / 60;
-    function redrawMap() {
-        setTimeout(() => {
+
+    //add a fallback function for older browsers
+
+    let redrawMap;
+    redrawMap =  function() {
+        if ( zoom_toggle ) {
+            context.clearRect( 0, 0, context.canvas.width * zoom_off.x, context.canvas.height * zoom_off.x );
+        } else {
             context.clearRect( 0, 0, context.canvas.width, context.canvas.height );
-            Game.TileMap.drawTilesAtOffset( context, mouse_offset );
-            redrawMap();
-        }, framerate_30 );
+        }
+        Game.TileMap.drawTilesAtOffset( context, mouse_offset );
+        window.requestAnimationFrame( redrawMap );
     }
-    redrawMap();
+
+    window.requestAnimationFrame( redrawMap );
 
     //little stuff for the html sketch
     spaghettiMenu();
@@ -525,6 +565,7 @@ document.addEventListener( "DOMContentLoaded", () => {
         let img_source = "./img/";
         let paths = [
             img_source + "land_grass_big.png",
+            img_source + "land_grass_mini.png",
             img_source + "army_mock_img.png"
         ]
 
