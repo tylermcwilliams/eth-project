@@ -90,14 +90,25 @@ router.post(
             error: "You cannot sell this item."
           });
         }
-        // new market order
-        const newOrder = new Market({
-          product: product._id,
-          owner: req.user.id,
-          buyOut: product.buyOut
+        // check if it's already on the market
+        Market.find({ product: product.id }, (err, onMarket) => {
+          if (err) {
+            return res.status(400).json(err);
+          }
+          if (onMarket) {
+            return res.status(400).json({
+              error: "This is already for sell."
+            });
+          }
+
+          const newOrder = new Market({
+            product: product._id,
+            owner: req.user.id,
+            buyOut: product.buyOut
+          });
+          newOrder.save();
+          return res.json({ message: "Successfully added." });
         });
-        newOrder.save();
-        return res.json({ message: "Successfully added." });
       }
     );
   }
