@@ -119,25 +119,45 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     // validation
-    userValid(
-      {
-        address: req.user.address,
-        name: req.body.name,
-        email: req.body.email
-      },
-      err => {
+    const errors = userValid({
+      name: req.body.name,
+      email: req.body.email
+    });
+
+    if (errors) {
+      return res.status(400).json(errors);
+    }
+
+    User.findOne(
+      { $or: [{ name: req.body.name }, { email: req.body.email }] },
+      (err, user) => {
         if (err) {
           return res.status(400).json(err);
         }
 
-        req.user.name = isEmpty(req.body.name)
-          ? req.user.address
-          : req.body.name;
+        if (!user) {
+          req.user.name = isEmpty(req.body.name)
+            ? req.user.address
+            : req.body.name;
 
-        req.user.email = req.body.email;
-        req.user.save();
+          req.user.email = req.body.email;
+          req.user.save();
 
-        return res.json({ message: "Successfully updated user" });
+          return res.json({ message: "Successfully updated user" });
+        }
+
+        if (user.address.toLowerCase() !== req.body.address.toLowerCase()) {
+          return res.status(400).json({
+            name:
+              req.body.name == user.name
+                ? "This username has already been taken"
+                : "",
+            email:
+              req.body.email == user.email
+                ? "This email has already been taken"
+                : ""
+          });
+        }
       }
     );
   }
