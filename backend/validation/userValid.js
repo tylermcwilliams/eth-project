@@ -12,21 +12,21 @@ function validateData(userData) {
 
   // check if input is valid before searching for user
   if (!validator.isAlphanumeric(userData.name)) {
-    errors.name += "n Name must contain only letters and numbers.";
+    errors.name += "Name must contain only letters and numbers. \n";
   }
   if (!validator.isLength(userData.name, 3, 12)) {
-    errors.name += "n Name must be between 3 and 12 digits.";
+    errors.name += "Name must be between 3 and 12 digits.\n";
   }
   if (filter.check(userData.name)) {
-    errors.name += "n Name cannot contain offensive words.";
+    errors.name += "Name cannot contain offensive words. \n";
   }
 
   // email
   if (!validator.isEmail(userData.email)) {
-    errors.email += "n Invalid email.";
+    errors.email += "Invalid email. \n";
   }
   if (filter.check(userData.email)) {
-    errors.email += "n Email cannot contain profanity.";
+    errors.email += "Email cannot contain profanity. \n";
   }
 
   return errors.email || errors.name ? errors : {};

@@ -1,7 +1,7 @@
 const router = require("express").Router();
 
 const Land = require("../models/Land");
-const Market = require("../models/Market");
+const LandMarket = require("../models/LandMarket");
 
 // GET /:id
 // gets a Land by id
@@ -19,7 +19,7 @@ router.get("/:id", (req, res) => {
         });
       }
 
-      Market.findOne({ product: land.id }, (err, market) => {
+      LandMarket.findOne({ land: land.id }, (err, listing) => {
         if (err) {
           return res.status(400).json(err);
         }
@@ -31,10 +31,25 @@ router.get("/:id", (req, res) => {
           bonus: land.bonus,
           bonusModifier: land.bonusModifier,
           buildings: [...land.buildings],
-          market
+          listing: listing ? listing : "Not for sell."
         });
       });
     });
 });
 
+// GET /inventory/:id
+// get's :id's lands
+router.get("/inventory/:id", (req, res) => {
+  Land.find({ owner: req.params.id }, (err, lands) => {
+    if (err) {
+      return res.status(400).json(err);
+    }
+
+    if (!lands.length) {
+      return res.status(404).json({ error: "Nothing found." });
+    }
+
+    return res.json(lands);
+  });
+});
 module.exports = router;

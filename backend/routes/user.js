@@ -13,7 +13,13 @@ const User = require("../models/User");
 // Retrieves a user by address or username
 router.get("/:id", (req, res) => {
   User.findOne(
-    { $or: [{ address: req.params.id }, { name: req.params.id }] },
+    {
+      $or: [
+        { address: req.params.id },
+        { name: req.params.id },
+        { _id: req.params.id }
+      ]
+    },
     (err, user) => {
       if (err) {
         return res.status(400).json(err);
@@ -32,7 +38,7 @@ router.get("/:id", (req, res) => {
 });
 
 // GET /nonce/:address
-// Gets user's nonce
+// Gets user's nonce, creates user
 router.get("/nonce/:address", (req, res) => {
   // return if address is invalid
   if (!ethUtil.isValidAddress(req.params.address)) {
@@ -48,6 +54,7 @@ router.get("/nonce/:address", (req, res) => {
       const newUser = new User({
         address: req.params.address,
         name: req.params.address,
+        balance: 0,
         nonce: Math.floor(Math.random() * 10000)
       });
 

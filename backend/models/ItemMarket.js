@@ -3,9 +3,9 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const Market = new Schema({
-  type: Number,
-  product: {
-    type: Schema.Types.ObjectId
+  item: {
+    type: Schema.Types.ObjectId,
+    ref: "Item"
   },
   owner: {
     type: Schema.Types.ObjectId,
@@ -20,4 +20,4 @@ const Market = new Schema({
   buyOut: Number
 });
 
-module.exports = mongoose.model("Market", Market);
+module.exports = mongoose.model("itemmarket", Market);

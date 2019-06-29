@@ -2,6 +2,8 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
+//
+
 const Hero = new Schema({
   type: {
     type: Schema.Types.ObjectId,
@@ -24,4 +26,4 @@ const Hero = new Schema({
 
 Hero.index({ owner: 1 });
 
-module.exports = mongoose.model("Hero", Hero);
+module.exports = mongoose.model("hero", Hero);

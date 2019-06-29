@@ -20,4 +20,4 @@ const Land = new Schema({
 
 Land.index({ owner: 1 });
 
-module.exports = mongoose.model("Land", Land);
+module.exports = mongoose.model("land", Land);

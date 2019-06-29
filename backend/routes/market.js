@@ -1,110 +1,157 @@
 const router = require("express").Router();
 const passport = require("passport");
+const isEmpty = require("is-empty");
 
-const Market = require("../models/Market");
+const bidValid = require("../validation/bidValid");
+const offerValid = require("../validation/offerValid");
+
+const User = require("../models/User");
+const HeroMarket = require("../models/HeroMarket");
+const ItemMarket = require("../models/ItemMarket");
+const LandMarket = require("../models/LandMarket");
 const Hero = require("../models/Hero");
 const Item = require("../models/Item");
 const Land = require("../models/Land");
-const User = require("../models/User");
+const HeroToken = require("../models/HeroToken");
+const ItemToken = require("../models/ItemToken");
 
-// GET /all
+// GET /all/:type
 // the entire market
-router.get("/all", (req, res) => {
+router.get("/all/:type", (req, res) => {
+  let Market;
+  switch (req.params.type) {
+    case "hero":
+      Market = HeroMarket;
+      break;
+    case "item":
+      Market = ItemMarket;
+      break;
+    case "land":
+      Market = LandMarket;
+      break;
+    default:
+      return res.status(400).json({ error: "Invalid market type." });
+  }
+
   Market.find({})
     .populate("product owner")
-    .exec((err, products) => {
+    .exec((err, listings) => {
       if (err) {
         return res.status(400).json(err);
       }
-      if (!products) {
+      if (!listings) {
         return res.status(404).json({
           error: "Market is empty."
         });
       }
       return res.json({
-        products: [...products]
+        listings: [...listings]
       });
     });
 });
 
-// GET /:id
+// GET /:type/:id
 // get individual product for sale
-router.get("/:id", (req, res) => {
+router.get("/:type/:id", (req, res) => {
+  let Market;
+  switch (req.params.type) {
+    case "hero":
+      Market = HeroMarket;
+      break;
+    case "item":
+      Market = ItemMarket;
+      break;
+    case "land":
+      Market = LandMarket;
+      break;
+    default:
+      return res.status(400).json({ error: "Invalid market type." });
+  }
   Market.findById(req.params.id)
     .populate("product owner")
-    .exec((err, product) => {
+    .exec((err, listing) => {
       if (err) {
         return res.status(400).json(err);
       }
-      if (!product) {
+      if (!listing) {
         return res.status(404).json({
-          error: "Item not found."
+          error: "Listing not found."
         });
       }
       return res.json({
-        product: product.product,
-        owner: product.owner,
-        buyOut: product.buyOut,
-        bestBid: product.bestBid
+        listing: listing[req.params.type],
+        owner: listing.owner,
+        buyOut: listing.buyOut,
+        bestBid: listing.bestBid
       });
     });
 });
 
-// POST /sell
+// POST /sell/:type/:id
 // sets up individual product for sale
+// {
+//  productType : Number (0: Hero, 1. Item, 2: Land)
+//  buyOut : Number
+// }
 router.post(
-  "/sell",
+  "/sell/:type/:id",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    // Verify the validity of body
-    if (req.body.buyOut <= 0) {
-      return res.status(400).json({
-        error: "Buy out price cannot be less than or equal to zero."
-      });
+    const inputErrors = offerValid({
+      id: req.params.id,
+      type: req.params.type,
+      buyOut: req.body.buyOut
+    });
+
+    if (inputErrors) {
+      return res.status(400).json(inputErrors);
     }
 
+    let Market;
     let schema;
-    switch (req.body.type) {
-      case 0:
+    switch (req.params.type) {
+      case "hero":
+        Market = HeroMarket;
         schema = Hero;
         break;
-      case 1:
+      case "item":
+        Market = ItemMarket;
         schema = Item;
         break;
-      case 2:
+      case "land":
+        Market = LandMarket;
         schema = Land;
         break;
       default:
-        return res.status(400).json({
-          error: "Invalid type."
-        });
+        return res.status(400).json({ error: "Invalid market type." });
     }
+
     schema.findOne(
-      { owner: req.user.address, id: req.body.id },
+      { owner: req.user.id, _id: req.params.id },
       (err, product) => {
         if (err) {
           return res.status(400).json(err);
         }
         if (!product) {
           return res.status(400).json({
-            error: "You cannot sell this item."
+            error: "You cannot sell this."
           });
         }
         // check if it's already on the market
-        Market.find({ product: product.id }, (err, onMarket) => {
+        Market.findOne({ product: product.id }, (err, listing) => {
           if (err) {
             return res.status(400).json(err);
           }
-          if (onMarket) {
+          if (listing) {
             return res.status(400).json({
               error: "This is already for sell."
             });
           }
 
           const newOrder = new Market({
-            product: product._id,
+            product: product.id,
             owner: req.user.id,
-            buyOut: product.buyOut
+            buyOut: req.body.buyOut ? req.body.buyOut : 0
           });
           newOrder.save();
           return res.json({ message: "Successfully added." });
@@ -116,155 +163,245 @@ router.post(
 
 // POST /buy/:id
 // buys individual product for sale
+// {
+//  productType : Number (0: Hero, 1. Item, 2: Land)
+//  bid : Number above 0
+// }
 router.post(
-  "/buy/:id",
+  "/buy/:type/:id",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
+    const inputErrors = bidValid({
+      id: req.params.id,
+      type: req.params.type,
+      bid: req.body.bid
+    });
+
+    if (inputErrors) {
+      return res.status(400).json(inputErrors);
+    }
+
+    let Market;
+    switch (req.params.type) {
+      case "hero":
+        Market = HeroMarket;
+        break;
+      case "item":
+        Market = ItemMarket;
+        break;
+      case "land":
+        Market = LandMarket;
+        break;
+      default:
+        return res.status(400).json({ error: "Invalid market type." });
+    }
+
     Market.findById(req.params.id)
-      .populate("owner bestBidder")
-      .exec((err, product) => {
+      .populate("owner bestBidder " + req.params.type)
+      .exec((err, listing) => {
         if (err) {
           return res.status(400).json(err);
         }
-        if (!product || product.bestBid > req.body.offer) {
+        // if listing doesn't exist or isn't populated
+        if (
+          !listing ||
+          !listing.populated("owner") ||
+          !listing.populated("product")
+        ) {
           return res.status(404).json({
             error: "Unable to place bid."
           });
         }
-
-        let schema;
-        switch (product.type) {
-          case 0:
-            schema = Hero;
-            break;
-          case 1:
-            schema = Item;
-            break;
-          case 2:
-            schema = Land;
-            break;
-          default:
-            return res.status(400).json({
-              error: "Invalid type."
-            });
+        // if the bid is zero or less than highest
+        if (listing.bestBid > req.body.bid) {
+          return res.status(400).json({
+            error: "Bid is too low."
+          });
+        }
+        // if bidder can't afford
+        if (req.user.balance && req.user.balance < req.body.bid) {
+          return res.status(400).json({
+            error: "You cannot afford this bid."
+          });
         }
 
-        schema
-          .findById(product.product)
-          .populate("type")
-          .exec((err, item) => {
-            if (err) {
-              return res.status(400).json(err);
-            }
-            if (!item) {
-              return res.status(404).json({
-                error: "Item not found."
-              });
-            }
-            // return money to best bidder. If it got this far, the new bid is higher
-            product.bestBidder.balance += product.bestBid;
-            product.bestBidder.save();
-            // buyout else bid
-            if (req.body.offer >= product.buyOut) {
-              product.owner.balance += product.buyOut;
-              req.user.balance -= req.body.offer;
-              item.owner = req.user._id;
-              item.save();
-              product.owner.save();
-              product.remove();
-            } else {
-              product.bestBid = req.body.offer;
-              product.bestBidder = req.user._id;
-              req.user.balance -= req.body.offer;
-              product.save();
-            }
-            req.user.save();
-            return res.json({ message: "Successfully placed bid." });
-          });
+        // finalize sale
+        // return money to best bidder. If it got this far, the new bid is higher
+        if (listing.bestBidder) {
+          listing.bestBidder.balance += listing.bestBid;
+          listing.bestBidder.save();
+        }
+        // buyout, else bid
+        if (req.body.bid >= listing.buyOut) {
+          // money exchange
+          listing.owner.balance += listing.buyOut;
+          req.user.balance -= req.body.buyOut;
+          listing.owner.save();
+          req.user.save();
+          //
+          listing[req.params.type].owner = req.user.id;
+          listing[req.params.type].save();
+          listing.remove();
+        } else {
+          listing.bestBidder = req.user.id;
+          listing.bestBid = req.body.bid;
+          req.user.balance -= req.body.bid;
+          req.user.save();
+          listing.save();
+        }
+        return res.json({ message: "Successfully placed bid." });
       });
   }
 );
 
-// POST /accept/:id
-// accepts the highest bid
-router.post(
-  "/accept/:id",
-  passport.authenticate("jwt", { session: false }),
-  (req, res) => {
-    Market.findById(req.params.id)
-      .populate("product owner bestBidder")
-      .exec((err, product) => {
-        if (err) {
-          return res.status(400).json(err);
-        }
-        if (!product || product.owner.id != req.user.id) {
-          res.status(404).json({
-            error: "Product not found."
-          });
-        }
-        req.user.balance += product.bestBid;
-        product.owner = req.user.id;
-        item.save();
-        req.user.save();
-        product.remove();
-
-        return res.json({ message: "Successfully accepted bid." });
-      });
-  }
-);
-
-// POST /edit/:id
+// POST /edit/:type/:id
 // edits individual product for sale
+// {
+//  productType : Number (0: Hero, 1. Item, 2: Land)
+//  buyOut : Number
+// }
 router.post(
-  "/edit/:id",
+  "/edit/:type/:id",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    Market.findById(req.params.id, (err, product) => {
+    const inputErrors = offerValid({
+      id: req.params.id,
+      type: req.params.type,
+      buyOut: req.body.buyOut
+    });
+
+    if (inputErrors) {
+      return res.status(400).json(inputErrors);
+    }
+
+    let Market;
+    switch (req.params.type) {
+      case "hero":
+        Market = HeroMarket;
+        break;
+      case "item":
+        Market = ItemMarket;
+        break;
+      case "land":
+        Market = LandMarket;
+        break;
+      default:
+        return res.status(400).json({ error: "Invalid market type." });
+    }
+
+    Market.findById(req.params.id, (err, listing) => {
       if (err) {
         return res.status(400).json(err);
       }
-      if (!product || product.owner != req.user.id) {
+      if (!listing || listing.owner != req.user.id) {
         return res.status(404).json({
-          error: "Product not found."
+          error: "Listing not found."
         });
       }
 
       // if the new price is less than highest bid, return
-      if (product.bestBid > req.body.offer) {
+      if (listing.bestBid && listing.bestBid > req.body.buyOut) {
         return res.status(400).json({
-          error: "Cannot post offer less than highest bid!"
+          error: "Cannot post buyOut less than highest bid!"
         });
       }
 
-      product.buyOut = req.body.offer;
-      product.save();
+      listing.buyOut = req.body.buyOut;
+      listing.save();
 
       return res.json({ message: "Successfully edited sale." });
     });
   }
 );
 
-// DELETE /delete/:id
-// deletes individual product for sale
+// DELETE /accept/:id
+// accepts the highest bid
 router.delete(
-  "/delete/:id",
+  "/accept/:type/:id",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
+    let Market;
+    switch (req.params.type) {
+      case "hero":
+        Market = HeroMarket;
+        break;
+      case "item":
+        Market = ItemMarket;
+        break;
+      case "land":
+        Market = LandMarket;
+        break;
+      default:
+        return res.status(400).json({ error: "Invalid market type." });
+    }
+
     Market.findById(req.params.id)
-      .populate("bestBidder")
-      .exec((err, product) => {
+      .populate("owner bestBidder " + req.params.type)
+      .exec((err, listing) => {
         if (err) {
           return res.status(400).json(err);
         }
-        if (!product || product.owner != req.user.id) {
-          return res.status(404).json({
-            error: "Product not found."
+        if (!listing || listing.owner.id != req.user.id) {
+          res.status(404).json({
+            error: "Listing not found."
           });
         }
 
-        product.bestBidder.balance += product.bestBid;
-        product.bestBidder.save();
-        product.remove();
+        if (!listing.bestBidder || !listing.bestBid) {
+          res.status(400).json({
+            error: "You do not have any bids."
+          });
+        }
+
+        req.user.balance += listing.bestBid;
+        listing.owner = listing.bestBidder;
+        listing[req.params.type].save();
+        req.user.save();
+        listing.remove();
+
+        return res.json({ message: "Successfully accepted bid." });
+      });
+  }
+);
+
+// DELETE /delete/:type/:id
+// deletes individual product for sale
+router.delete(
+  "/delete/:type/:id",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    let Market;
+    switch (req.params.type) {
+      case "hero":
+        Market = HeroMarket;
+        break;
+      case "item":
+        Market = ItemMarket;
+        break;
+      case "land":
+        Market = LandMarket;
+        break;
+      default:
+        return res.status(400).json({ error: "Invalid market type." });
+    }
+
+    Market.findById(req.params.id)
+      .populate("bestBidder")
+      .exec((err, listing) => {
+        if (err) {
+          return res.status(400).json(err);
+        }
+        if (!listing || listing.owner != req.user.id) {
+          return res.status(404).json({
+            error: "Listing not found."
+          });
+        }
+
+        if (listing.bestBidder) {
+          listing.bestBidder.balance += listing.bestBid;
+          listing.bestBidder.save();
+        }
+        listing.remove();
 
         return res.json({ message: "Successfully removed sale." });
       });

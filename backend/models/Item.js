@@ -20,4 +20,4 @@ const Item = new Schema({
 
 Item.index({ owner: 1, hero: 1 });
 
-module.exports = mongoose.model("Item", Item);
+module.exports = mongoose.model("item", Item);

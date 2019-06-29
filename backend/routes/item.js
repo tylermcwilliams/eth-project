@@ -1,9 +1,8 @@
 const router = require("express").Router();
 
 const Item = require("../models/Item");
-const Market = require("../models/Market");
 
-// GET /:id
+// GET /single/:id
 // gets a item by id
 router.get("/:id", (req, res) => {
   // if address doesn't exist, register it
@@ -19,17 +18,28 @@ router.get("/:id", (req, res) => {
         });
       }
 
-      Market.findOne({ product: item.id }, (err, market) => {
-        if (err) {
-          return res.status(400).json(err);
-        }
-        return res.json({
-          type: item.type,
-          owner: item.owner,
-          name: item.name
-        });
+      return res.json({
+        type: item.type,
+        owner: item.owner,
+        name: item.name
       });
     });
+});
+
+// GET /inventory/:id
+// get's :id's items
+router.get("/inventory/:id", (req, res) => {
+  Item.find({ owner: req.params.id }, (err, items) => {
+    if (err) {
+      return res.status(400).json(err);
+    }
+
+    if (!items.length) {
+      return res.status(404).json({ error: "Nothing found." });
+    }
+
+    return res.json(items);
+  });
 });
 
 module.exports = router;
