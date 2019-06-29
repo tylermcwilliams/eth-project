@@ -1,7 +1,7 @@
 const router = require("express").Router();
 
 const Land = require("../models/Land");
-const LandMarket = require("../models/LandMarket");
+const LandListing = require("../models/LandListing");
 
 // GET /:id
 // gets a Land by id
@@ -19,7 +19,7 @@ router.get("/:id", (req, res) => {
         });
       }
 
-      LandMarket.findOne({ land: land.id }, (err, listing) => {
+      LandListing.findOne({ land: land.id }, (err, listing) => {
         if (err) {
           return res.status(400).json(err);
         }

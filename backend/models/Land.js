@@ -9,7 +9,7 @@ const Land = new Schema({
   name: String,
   owner: {
     type: Schema.Types.ObjectId,
-    ref: "User"
+    ref: "users"
   },
 
   bonus: Number,
@@ -20,4 +20,4 @@ const Land = new Schema({
 
 Land.index({ owner: 1 });
 
-module.exports = mongoose.model("land", Land);
+module.exports = mongoose.model("lands", Land);

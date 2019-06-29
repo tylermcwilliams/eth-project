@@ -18,4 +18,4 @@ const HeroToken = new Schema({
   amount: Number
 });
 
-module.exports = mongoose.model("herotoken", HeroToken);
+module.exports = mongoose.model("herotokens", HeroToken);

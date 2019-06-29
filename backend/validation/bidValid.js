@@ -4,21 +4,21 @@ const validator = require("validator");
 
 function validateData(bidData) {
   const errors = {
-    id: null,
-    bid: null
+    id: "",
+    bid: ""
   };
 
   // validate type
   if (!validator.isMongoId(bidData.id)) {
-    errors.bid += "The productType must be a number. \n";
+    errors.bid += "Nothing found by this id.";
   }
 
   // validate bid
   if (!validator.isNumeric(bidData.bid)) {
-    errors.bid += "The bid must be a number. \n";
+    errors.bid += "The bid must be a number.";
   }
   if (bidData.bid <= 0) {
-    errors.bid += "The bid must be greater than zero \n";
+    errors.bid += "The bid must be greater than zero.";
   }
 
   return errors.id || errors.bid ? errors : null;

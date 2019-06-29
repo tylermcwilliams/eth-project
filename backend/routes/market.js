@@ -6,14 +6,12 @@ const bidValid = require("../validation/bidValid");
 const offerValid = require("../validation/offerValid");
 
 const User = require("../models/User");
-const HeroMarket = require("../models/HeroMarket");
-const ItemMarket = require("../models/ItemMarket");
-const LandMarket = require("../models/LandMarket");
+const HeroListing = require("../models/HeroListing");
+const ItemListing = require("../models/ItemListing");
+const LandListing = require("../models/LandListing");
 const Hero = require("../models/Hero");
 const Item = require("../models/Item");
 const Land = require("../models/Land");
-const HeroToken = require("../models/HeroToken");
-const ItemToken = require("../models/ItemToken");
 
 // GET /all/:type
 // the entire market
@@ -21,13 +19,13 @@ router.get("/all/:type", (req, res) => {
   let Market;
   switch (req.params.type) {
     case "hero":
-      Market = HeroMarket;
+      Market = HeroListing;
       break;
     case "item":
-      Market = ItemMarket;
+      Market = ItemListing;
       break;
     case "land":
-      Market = LandMarket;
+      Market = LandListing;
       break;
     default:
       return res.status(400).json({ error: "Invalid market type." });
@@ -56,13 +54,13 @@ router.get("/:type/:id", (req, res) => {
   let Market;
   switch (req.params.type) {
     case "hero":
-      Market = HeroMarket;
+      Market = HeroListing;
       break;
     case "item":
-      Market = ItemMarket;
+      Market = ItemListing;
       break;
     case "land":
-      Market = LandMarket;
+      Market = LandListing;
       break;
     default:
       return res.status(400).json({ error: "Invalid market type." });
@@ -99,7 +97,6 @@ router.post(
   (req, res) => {
     const inputErrors = offerValid({
       id: req.params.id,
-      type: req.params.type,
       buyOut: req.body.buyOut
     });
 
@@ -111,15 +108,15 @@ router.post(
     let schema;
     switch (req.params.type) {
       case "hero":
-        Market = HeroMarket;
+        Market = HeroListing;
         schema = Hero;
         break;
       case "item":
-        Market = ItemMarket;
+        Market = ItemListing;
         schema = Item;
         break;
       case "land":
-        Market = LandMarket;
+        Market = LandListing;
         schema = Land;
         break;
       default:
@@ -181,16 +178,23 @@ router.post(
       return res.status(400).json(inputErrors);
     }
 
+    // if bidder can't afford
+    if (req.user.balance && req.user.balance < req.body.bid) {
+      return res.status(400).json({
+        error: "You cannot afford this bid."
+      });
+    }
+
     let Market;
     switch (req.params.type) {
       case "hero":
-        Market = HeroMarket;
+        Market = HeroListing;
         break;
       case "item":
-        Market = ItemMarket;
+        Market = ItemListing;
         break;
       case "land":
-        Market = LandMarket;
+        Market = LandListing;
         break;
       default:
         return res.status(400).json({ error: "Invalid market type." });
@@ -212,16 +216,14 @@ router.post(
             error: "Unable to place bid."
           });
         }
-        // if the bid is zero or less than highest
+        // if bidder is owner
+        if (req.user.id == listing.owner) {
+          res.status(400).json({ error: "You can't bid your own listing." });
+        }
+        // if the bid is less than highest
         if (listing.bestBid > req.body.bid) {
           return res.status(400).json({
             error: "Bid is too low."
-          });
-        }
-        // if bidder can't afford
-        if (req.user.balance && req.user.balance < req.body.bid) {
-          return res.status(400).json({
-            error: "You cannot afford this bid."
           });
         }
 
@@ -277,13 +279,13 @@ router.post(
     let Market;
     switch (req.params.type) {
       case "hero":
-        Market = HeroMarket;
+        Market = HeroListing;
         break;
       case "item":
-        Market = ItemMarket;
+        Market = ItemListing;
         break;
       case "land":
-        Market = LandMarket;
+        Market = LandListing;
         break;
       default:
         return res.status(400).json({ error: "Invalid market type." });
@@ -323,13 +325,13 @@ router.delete(
     let Market;
     switch (req.params.type) {
       case "hero":
-        Market = HeroMarket;
+        Market = HeroListing;
         break;
       case "item":
-        Market = ItemMarket;
+        Market = ItemListing;
         break;
       case "land":
-        Market = LandMarket;
+        Market = LandListing;
         break;
       default:
         return res.status(400).json({ error: "Invalid market type." });
@@ -373,13 +375,13 @@ router.delete(
     let Market;
     switch (req.params.type) {
       case "hero":
-        Market = HeroMarket;
+        Market = HeroListing;
         break;
       case "item":
-        Market = ItemMarket;
+        Market = ItemListing;
         break;
       case "land":
-        Market = LandMarket;
+        Market = LandListing;
         break;
       default:
         return res.status(400).json({ error: "Invalid market type." });

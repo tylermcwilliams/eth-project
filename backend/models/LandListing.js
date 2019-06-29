@@ -2,22 +2,22 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
-const Market = new Schema({
-  item: {
+const LandListings = new Schema({
+  land: {
     type: Schema.Types.ObjectId,
-    ref: "Item"
+    ref: "lands"
   },
   owner: {
     type: Schema.Types.ObjectId,
-    ref: "User"
+    ref: "users"
   },
   bestBid: Number,
   bestBidder: {
     type: Schema.Types.ObjectId,
-    ref: "User"
+    ref: "users"
   },
 
   buyOut: Number
 });
 
-module.exports = mongoose.model("itemmarket", Market);
+module.exports = mongoose.model("landlistings", LandListings);

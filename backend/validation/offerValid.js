@@ -4,18 +4,18 @@ const validator = require("validator");
 
 function validateData(offerData) {
   const errors = {
-    id: null,
-    buyOut: null
+    id: "",
+    buyOut: ""
   };
 
   // validate type
   if (!validator.isMongoId(offerData.id)) {
-    errors.bid += "The productType must be a number. \n";
+    errors.id += "Nothing found by this id.";
   }
 
   // validate buyout. It's optional
   if (offerData.buyOut && !validator.isNumeric(offerData.buyOut)) {
-    errors.bid += "The buyOut must be a number. \n";
+    errors.bid += "The buyOut must be a number.";
   }
 
   return errors.id || errors.buyOut ? errors : null;

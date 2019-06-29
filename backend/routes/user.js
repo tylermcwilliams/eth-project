@@ -14,11 +14,7 @@ const User = require("../models/User");
 router.get("/:id", (req, res) => {
   User.findOne(
     {
-      $or: [
-        { address: req.params.id },
-        { name: req.params.id },
-        { _id: req.params.id }
-      ]
+      $or: [{ address: req.params.id }, { name: req.params.id }]
     },
     (err, user) => {
       if (err) {

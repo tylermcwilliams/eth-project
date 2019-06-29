@@ -7,14 +7,14 @@ const Schema = mongoose.Schema;
 const Hero = new Schema({
   type: {
     type: Schema.Types.ObjectId,
-    ref: "HeroToken"
+    ref: "herotokens"
   },
   level: Number,
   experience: Number,
   name: String,
   owner: {
     type: Schema.Types.ObjectId,
-    ref: "User"
+    ref: "users"
   },
   units: [
     {
@@ -26,4 +26,4 @@ const Hero = new Schema({
 
 Hero.index({ owner: 1 });
 
-module.exports = mongoose.model("hero", Hero);
+module.exports = mongoose.model("heroes", Hero);

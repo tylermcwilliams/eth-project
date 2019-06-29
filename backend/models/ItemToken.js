@@ -20,4 +20,4 @@ const ItemToken = new Schema({
   amount: Number
 });
 
-module.exports = mongoose.model("itemtoken", ItemToken);
+module.exports = mongoose.model("itemtokens", ItemToken);
