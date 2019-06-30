@@ -17,6 +17,7 @@ mongoose.connect(mongoDb, err => {
 
 // Testing
 //require("./tests/dbitem");
+require("./game/income");
 
 // middleware
 app.use(bodyParser.json());
