@@ -1,12 +1,11 @@
 const router = require("express").Router();
 const passport = require("passport");
-const mongodb = require("mongoose");
-const isEmpty = require("is-empty");
-
-const runrs = require("run-rs");
 
 const bidValid = require("../validation/bidValid");
 const offerValid = require("../validation/offerValid");
+
+const transfer = require("../tx/transfer");
+const bid = require("../tx/bid");
 
 const User = require("../models/User");
 const HeroListing = require("../models/HeroListing");
@@ -166,7 +165,7 @@ router.post(
 );
 
 // TRANSACTION
-// POST /buy/:id
+// POST /buy/:type/:id
 // buys individual product for sale
 // {
 //  productType : Number (0: Hero, 1. Item, 2: Land)
@@ -218,15 +217,17 @@ router.post(
         if (
           !listing ||
           !listing.populated("owner") ||
-          !listing.populated("product")
+          !listing.populated(req.params.type)
         ) {
           return res.status(404).json({
             error: "Unable to place bid."
           });
         }
         // if bidder is owner
-        if (req.user.id == listing.owner) {
-          res.status(400).json({ error: "You can't bid your own listing." });
+        if (req.user.id == listing.owner.id) {
+          return res
+            .status(400)
+            .json({ error: "You can't bid your own listing." });
         }
         // if the bid is less than highest
         if (listing.bestBid > req.body.bid) {
@@ -239,27 +240,87 @@ router.post(
         // return money to best bidder. If it got this far, the new bid is higher
         if (listing.bestBidder) {
           listing.bestBidder.balance += listing.bestBid;
-          listing.bestBidder.save();
-        }
-        // buyout, else bid
-        if (req.body.bid >= listing.buyOut) {
-          // money exchange
-          listing.owner.balance += listing.buyOut;
-          req.user.balance -= req.body.buyOut;
-          listing.owner.save();
-          req.user.save();
-          //
-          listing[req.params.type].owner = req.user.id;
-          listing[req.params.type].save();
-          listing.remove();
+          listing.bestBidder.save((err, saved) => {
+            if (err) {
+              return res.status(400).json(err);
+            }
+            if (listing.buyOut && req.body.bid >= listing.buyOut) {
+              const tx = {
+                type: req.params.type,
+                buyer: req.user.id,
+                seller: listing.owner.id,
+                price: listing.buyOut,
+                product: listing[req.params.type].id,
+                listing: listing.id,
+                isfinal: true
+              };
+
+              transfer(tx)
+                .then(tx => {
+                  return res.json({ message: "Success.", tx });
+                })
+                .catch(err => {
+                  return res.status(400).json(err);
+                });
+            } else {
+              const tx = {
+                type: req.params.type,
+                bidder: req.user.id,
+                price: req.body.bid,
+                listing: listing.id
+              };
+
+              bid(tx)
+                .then(tx => {
+                  return res.json({ message: "Success", tx });
+                })
+                .catch(err => {
+                  return res.status(400).json(err);
+                });
+            }
+          });
         } else {
-          listing.bestBidder = req.user.id;
-          listing.bestBid = req.body.bid;
-          req.user.balance -= req.body.bid;
-          req.user.save();
-          listing.save();
+          if (listing.buyOut && req.body.bid >= listing.buyOut) {
+            req.user.balance -= req.body.buyOut;
+            if (req.user.balance < 0) {
+              return res
+                .status(400)
+                .json({ error: "You cannot afford this bid." });
+            }
+            const tx = {
+              type: req.params.type,
+              buyer: req.user.id,
+              seller: listing.owner.id,
+              price: listing.buyOut,
+              product: listing[req.params.type].id,
+              listing: listing.id,
+              isfinal: true
+            };
+
+            transfer(tx)
+              .then(tx => {
+                return res.json({ message: "Success.", tx });
+              })
+              .catch(err => {
+                return res.status(400).json(err);
+              });
+          } else {
+            const tx = {
+              type: req.params.type,
+              bidder: req.user.id,
+              price: req.body.bid,
+              listing: listing.id
+            };
+
+            bid(tx)
+              .then(tx => {
+                return res.json({ message: "Success", tx });
+              })
+              .catch(err => {
+                return res.status(400).json(err);
+              });
+          }
         }
-        return res.json({ message: "Successfully placed bid." });
       });
   }
 );
@@ -358,28 +419,37 @@ router.delete(
         if (err) {
           return res.status(400).json(err);
         }
+
+        console.log(listing);
         if (!listing || listing.owner.id != req.user.id) {
-          res.status(404).json({
+          return res.status(404).json({
             error: "Listing not found."
           });
         }
 
         if (!listing.bestBidder || !listing.bestBid) {
-          res.status(400).json({
+          return res.status(400).json({
             error: "You do not have any bids."
           });
         }
 
-        // add money to seller
-        req.user.balance += listing.bestBid;
-        // change ownership
-        listing.owner = listing.bestBidder;
+        // build a transaction
+        const tx = {
+          type: req.params.type,
+          buyer: listing.bestBidder.id,
+          seller: listing.owner.id,
+          price: listing.bestBid,
+          product: listing[req.params.type].id,
+          listing: listing.id
+        };
 
-        listing[req.params.type].save();
-        req.user.save();
-        listing.remove();
-
-        return res.json({ message: "Successfully accepted bid." });
+        transfer(tx)
+          .then(tx => {
+            return res.json({ message: "Success.", tx });
+          })
+          .catch(err => {
+            return res.status(400).json(err);
+          });
       });
   }
 );

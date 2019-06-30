@@ -1,3 +1,5 @@
 keys.js
 node_modules
 devnotebook.txt
+/.vscode
+/backend/tests

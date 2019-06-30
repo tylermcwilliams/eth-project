@@ -2,7 +2,7 @@ const router = require("express").Router();
 
 const Item = require("../models/Item");
 
-// GET /single/:id
+// GET /:id
 // gets a item by id
 router.get("/:id", (req, res) => {
   // if address doesn't exist, register it

@@ -15,6 +15,9 @@ mongoose.connect(mongoDb, err => {
   console.log(err || "Connected to database");
 });
 
+// Testing
+//require("./tests/dbitem");
+
 // middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
