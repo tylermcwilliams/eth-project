@@ -54,12 +54,15 @@ router.get("/nonce/:address", (req, res) => {
         nonce: Math.floor(Math.random() * 10000)
       });
 
-      newUser.save();
-
-      user = newUser;
+      newUser.save((err, saved) => {
+        if (err) {
+          return res.status(400).json(err);
+        }
+        return res.json({ nonce: saved.nonce });
+      });
+    } else {
+      return res.json({ nonce: user.nonce });
     }
-
-    return res.json({ nonce: user.nonce });
   });
 });
 
@@ -93,25 +96,30 @@ router.post("/login", (req, res) => {
     }
     // create new nonce for user
     user.nonce = Math.floor(Math.random() * 10000);
-    user.save();
-    // generation of jwt token
-    jwt.sign(
-      {
-        id: user.id,
-        address: user.address
-      },
-      jwtSecret,
-      {},
-      (err, token) => {
-        if (err) {
-          return res.status(500).json(err);
-        }
-        return res.json({
-          message: "Authenticated",
-          token: "Bearer" + token
-        });
+    user.save((err, saved) => {
+      if (err) {
+        return res.status(400).json(err);
       }
-    );
+
+      jwt.sign(
+        {
+          id: saved.id,
+          address: saved.address
+        },
+        jwtSecret,
+        {},
+        (err, token) => {
+          if (err) {
+            return res.status(500).json(err);
+          }
+          return res.json({
+            message: "Authenticated",
+            token: "Bearer" + token,
+            user: saved
+          });
+        }
+      );
+    });
   });
 });
 
@@ -144,9 +152,16 @@ router.post(
             : req.body.name;
 
           req.user.email = req.body.email;
-          req.user.save();
+          req.user.save((err, saved) => {
+            if (err) {
+              return res.status(400).json(err);
+            }
 
-          return res.json({ message: "Successfully updated user" });
+            return res.json({
+              message: "Successfully updated user",
+              user: saved
+            });
+          });
         }
 
         if (user.address.toLowerCase() !== req.body.address.toLowerCase()) {

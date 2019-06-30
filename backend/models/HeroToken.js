@@ -7,9 +7,10 @@ const HeroToken = new Schema({
   rarity: Number,
   name: String,
 
-  attack: Number,
-  defence: Number,
-  intelligence: Number,
+  atk: Number,
+  def: Number,
+  int: Number,
+  spd: Number,
 
   bonus: Number,
   bonusModifier: Number,

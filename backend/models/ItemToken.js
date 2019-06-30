@@ -9,9 +9,10 @@ const ItemToken = new Schema({
 
   slot: Number,
 
-  attack: Number,
-  defence: Number,
-  intelligence: Number,
+  atk: Number,
+  def: Number,
+  int: Number,
+  spd: Number,
 
   bonus: Number,
   bonusModifier: Number,

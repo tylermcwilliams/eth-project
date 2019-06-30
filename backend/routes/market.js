@@ -1,6 +1,9 @@
 const router = require("express").Router();
 const passport = require("passport");
+const mongodb = require("mongoose");
 const isEmpty = require("is-empty");
+
+const runrs = require("run-rs");
 
 const bidValid = require("../validation/bidValid");
 const offerValid = require("../validation/offerValid");
@@ -135,7 +138,7 @@ router.post(
           });
         }
         // check if it's already on the market
-        Market.findOne({ product: product.id }, (err, listing) => {
+        Market.findOne({ [req.params.type]: product.id }, (err, listing) => {
           if (err) {
             return res.status(400).json(err);
           }
@@ -145,19 +148,24 @@ router.post(
             });
           }
 
-          const newOrder = new Market({
-            product: product.id,
+          const newListing = new Market({
+            [req.params.type]: product.id,
             owner: req.user.id,
             buyOut: req.body.buyOut ? req.body.buyOut : 0
           });
-          newOrder.save();
-          return res.json({ message: "Successfully added." });
+          newListing.save((err, saved) => {
+            if (err) {
+              return res.status(400).json(err);
+            }
+            return res.json({ message: "Successfully added.", listing: saved });
+          });
         });
       }
     );
   }
 );
 
+// TRANSACTION
 // POST /buy/:id
 // buys individual product for sale
 // {
@@ -309,13 +317,20 @@ router.post(
       }
 
       listing.buyOut = req.body.buyOut;
-      listing.save();
-
-      return res.json({ message: "Successfully edited sale." });
+      listing.save((err, saved) => {
+        if (err) {
+          return res.status(400).json(err);
+        }
+        return res.json({
+          message: "Successfully edited sale.",
+          listing: saved
+        });
+      });
     });
   }
 );
 
+// TRANSACTION
 // DELETE /accept/:id
 // accepts the highest bid
 router.delete(
@@ -355,8 +370,11 @@ router.delete(
           });
         }
 
+        // add money to seller
         req.user.balance += listing.bestBid;
+        // change ownership
         listing.owner = listing.bestBidder;
+
         listing[req.params.type].save();
         req.user.save();
         listing.remove();
@@ -401,11 +419,25 @@ router.delete(
 
         if (listing.bestBidder) {
           listing.bestBidder.balance += listing.bestBid;
-          listing.bestBidder.save();
+          listing.bestBidder.save((err, saved) => {
+            if (err) {
+              return res.status(400).json(err);
+            }
+            listing.remove((err, removed) => {
+              if (err) {
+                return res.status(400).json(err);
+              }
+              return res.json({ message: "Successfully removed sale." });
+            });
+          });
+        } else {
+          listing.remove((err, removed) => {
+            if (err) {
+              return res.status(400).json(err);
+            }
+            return res.json({ message: "Successfully removed sale." });
+          });
         }
-        listing.remove();
-
-        return res.json({ message: "Successfully removed sale." });
       });
   }
 );

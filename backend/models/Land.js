@@ -15,9 +15,13 @@ const Land = new Schema({
   bonus: Number,
   bonusModifier: Number,
 
-  buildings: [Number]
+  buildings: {
+    slotOne: Number,
+    slotTwo: Number,
+    slotThree: Number
+  }
 });
 
-Land.index({ owner: 1 });
+//Land.index({ owner: 1 });
 
 module.exports = mongoose.model("lands", Land);

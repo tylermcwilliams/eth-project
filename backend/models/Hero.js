@@ -24,6 +24,6 @@ const Hero = new Schema({
   ]
 });
 
-Hero.index({ owner: 1 });
+//Hero.index({ owner: 1 });
 
 module.exports = mongoose.model("heroes", Hero);

@@ -5,19 +5,19 @@ const Schema = mongoose.Schema;
 const Item = new Schema({
   type: {
     type: Schema.Types.ObjectId,
-    ref: "ItemToken"
+    ref: "itemtokens"
   },
   name: String,
   hero: {
     type: Schema.Types.ObjectId,
-    ref: "Hero"
+    ref: "heroes"
   },
   owner: {
     type: Schema.Types.ObjectId,
-    ref: "User"
+    ref: "users"
   }
 });
 
-Item.index({ owner: 1, hero: 1 });
+//Item.index({ owner: 1, hero: 1 });
 
 module.exports = mongoose.model("items", Item);
