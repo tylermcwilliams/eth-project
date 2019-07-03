@@ -21,7 +21,8 @@ const Hero = new Schema({
       type: Number,
       amount: Number
     }
-  ]
+  ],
+  inmarket: Number // 0: no, 1: pending, 2: yes
 });
 
 //Hero.index({ owner: 1 });

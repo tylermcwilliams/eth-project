@@ -14,7 +14,7 @@ const User = require("../models/User");
 router.get("/:id", (req, res) => {
   User.findOne(
     {
-      $or: [{ address: req.params.id }, { name: req.params.id }]
+      $or: [{ _id: req.params.id }, { name: req.params.id }]
     },
     (err, user) => {
       if (err) {
@@ -23,7 +23,7 @@ router.get("/:id", (req, res) => {
       if (user) {
         return res.json({
           name: user.name,
-          address: user.address,
+          address: user.id,
           empire: user.empire
         });
       } else {
@@ -41,14 +41,14 @@ router.get("/nonce/:address", (req, res) => {
     return res.status(400).json({ error: "The address specified is invalid." });
   }
   // if address doesn't exist, register it
-  User.findOne({ address: req.params.address }, (err, user) => {
+  User.findById(req.params.address, (err, user) => {
     if (err) {
       return res.status(400).json(err);
     }
     if (!user) {
       // create new user
       const newUser = new User({
-        address: req.params.address,
+        _id: req.params.address,
         name: req.params.address,
         balance: 0,
         nonce: Math.floor(Math.random() * 10000)

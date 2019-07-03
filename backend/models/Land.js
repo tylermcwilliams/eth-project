@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const Land = new Schema({
-  serial: Number,
   type: Number,
   income: Number,
   name: String,
@@ -19,7 +18,9 @@ const Land = new Schema({
     slotOne: Number,
     slotTwo: Number,
     slotThree: Number
-  }
+  },
+
+  inmarket: Number // 0: no, 1: pending, 2: yes
 });
 
 //Land.index({ owner: 1 });

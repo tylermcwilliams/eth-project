@@ -6,7 +6,6 @@ const LandListing = require("../models/LandListing");
 // GET /:id
 // gets a Land by id
 router.get("/:id", (req, res) => {
-  // if address doesn't exist, register it
   Land.findById(req.params.id)
     .populate("owner")
     .exec((err, land) => {

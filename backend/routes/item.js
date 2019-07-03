@@ -5,7 +5,6 @@ const Item = require("../models/Item");
 // GET /:id
 // gets a item by id
 router.get("/:id", (req, res) => {
-  // if address doesn't exist, register it
   Item.findById(req.params.id)
     .populate("type owner")
     .exec((err, item) => {

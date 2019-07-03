@@ -7,7 +7,6 @@ const User = new Schema({
   email: String,
 
   nonce: Number,
-  address: String,
 
   balance: Number,
   income: Number,
