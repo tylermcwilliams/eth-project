@@ -16,6 +16,7 @@ const Item = new Schema({
     type: Schema.Types.ObjectId,
     ref: "users"
   },
+  
   inmarket: Number // 0: no, 1: pending, 2: yes
 });
 

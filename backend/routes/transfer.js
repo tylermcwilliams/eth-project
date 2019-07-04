@@ -20,5 +20,13 @@ const Land = require("../models/Land");
 router.post(
   "/out/:type/:id",
   passport.authenticate("jwt", { session: false }),
-  (req, res) => {}
+  (req, res) => {
+    if (user.balance < 50) {
+      return res.status(500).json({
+        error: "Transfers cost 50 gold."
+      });
+    }
+
+    
+  }
 );

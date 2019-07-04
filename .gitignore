@@ -3,3 +3,4 @@ node_modules
 devnotebook.txt
 /.vscode
 /backend/tests
+.env

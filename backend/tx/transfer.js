@@ -43,8 +43,6 @@ module.exports = async function transfer(tx) {
         opts
       );
 
-      console.log(buyerInst.balance);
-
       if (buyerInst.balance < 0) {
         throw new Error("Buyer cannot afford this bid.");
       }
